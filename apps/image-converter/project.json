@@ -1,0 +1,53 @@
+{
+  "name": "image-converter",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/image-converter/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/image-converter",
+        "main": "apps/image-converter/src/main.ts",
+        "tsConfig": "apps/image-converter/tsconfig.app.json",
+        "assets": ["apps/image-converter/src/assets"],
+        "webpackConfig": "apps/image-converter/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "image-converter:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "image-converter:build:development"
+        },
+        "production": {
+          "buildTarget": "image-converter:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"]
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/image-converter/jest.config.ts"
+      }
+    }
+  },
+  "tags": []
+}
