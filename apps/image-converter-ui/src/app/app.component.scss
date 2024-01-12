@@ -1,0 +1,39 @@
+main {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    h1 {
+        text-align: center;
+    }
+
+
+    &>div {
+        background-color: rgb(238, 211, 89);
+        padding: 2rem;
+        border-radius: 1rem;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin: 1rem;
+
+        &.images {
+            background-color: rgb(255, 168, 36);
+            display: grid;
+            grid-row-gap: 0.5rem;
+            grid-column-gap: 0.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+
+            &>div {
+                img {
+                    width: 100%;
+                }
+            }
+
+
+        }
+    }
+}

@@ -27,6 +27,10 @@
           "codeCoverage": true
         }
       }
+    },
+    "e2e": {
+      "cache": true,
+      "inputs": ["default", "^production"]
     }
   },
   "namedInputs": {
@@ -43,5 +47,20 @@
     ],
     "sharedGlobals": []
   },
-  "nxCloudAccessToken": "ZjQ0MmFlYWQtMTViYi00ZmM2LWIxMTItYTY1ZGMyNjEzYjkxfHJlYWQtd3JpdGU="
+  "nxCloudAccessToken": "ZjQ0MmFlYWQtMTViYi00ZmM2LWIxMTItYTY1ZGMyNjEzYjkxfHJlYWQtd3JpdGU=",
+  "generators": {
+    "@nx/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "playwright"
+    },
+    "@nx/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    },
+    "@nx/angular:component": {
+      "style": "scss"
+    }
+  }
 }

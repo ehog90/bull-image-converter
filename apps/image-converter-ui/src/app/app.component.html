@@ -1,0 +1,26 @@
+<main>
+    <h1>The BULL AVIF converter</h1>
+    <div>
+        <div>
+            <ngx-dropzone (change)="pickFiles($event)" accept="image/png, image/gif, image/jpeg">
+                <ngx-dropzone-label>Drop images</ngx-dropzone-label>
+                @for (f of files; track $index) {
+                <ngx-dropzone-preview [removable]="true" (removed)="removeFile(f)">
+                    <ngx-dropzone-label>{{ f.name }} ({{ f.type }})</ngx-dropzone-label>
+                </ngx-dropzone-preview>
+                }
+
+            </ngx-dropzone>
+        </div>
+
+        <div>
+            <button (click)="uploadFiles()" [disabled]="files.length === 0">Upload</button>
+        </div>
+    </div>
+    <div class="images">@for( img of converted; track $index) {
+        <div>
+            <img [src]="baseUrl +'/' + img">
+        </div>
+        }
+    </div>
+</main>
