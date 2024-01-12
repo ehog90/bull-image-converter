@@ -1,19 +1,18 @@
-import { Process, Processor } from '@nestjs/bull';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import { Job } from 'bull';
+import { Job } from 'bullmq';
 import { ImageJob } from '../../types';
 import sharp from 'sharp';
 import { EventBus } from '@nestjs/cqrs';
 import { ImageConvertedEvent } from '../../events/image-converted.event';
 import { join } from 'path';
-@Processor('images')
-export class ImageProcessorService {
-  private logger = new Logger(ImageProcessorService.name);
+@Processor('images', { concurrency: 1 })
+export class ImageProcessorService extends WorkerHost {
+  constructor(private readonly eventBus: EventBus) {
+    super();
+  }
 
-  constructor(private readonly eventBus: EventBus) {}
-
-  @Process()
-  async transcode(job: Job<ImageJob>) {
+  async process(job: Job<ImageJob, unknown, string>): Promise<unknown> {
     this.logger.log('Converting job is running: ' + job.data.name);
     const buffer = Buffer.from(job.data.content, 'base64');
     const fileName = `${job.data.name}.avif`;
@@ -23,4 +22,5 @@ export class ImageProcessorService {
     this.eventBus.publish(new ImageConvertedEvent(fileName));
     return true;
   }
+  private logger = new Logger(ImageProcessorService.name);
 }

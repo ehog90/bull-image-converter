@@ -1,6 +1,6 @@
-# BULL Image Converter
+# BullMQ Image Converter
 
-Simple use-case for online AVIF image conversion using Nest.JS with Bull and Redis, with an Angular Frontend.
+Simple use-case for online AVIF image conversion using Nest.JS with BullMQ and Redis, with an Angular Frontend.
 
 ## Prerequisites.
 

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+import { BullModule } from '@nestjs/bullmq';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { CqrsModule } from '@nestjs/cqrs';
 
@@ -23,7 +23,7 @@ if (!existsSync(staticDir)) {
       rootPath: staticDir,
     }),
     BullModule.forRoot({
-      redis: {
+      connection: {
         host: 'localhost',
         port: 6379,
       },
