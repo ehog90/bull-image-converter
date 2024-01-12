@@ -1,4 +1,6 @@
 export type ImageJob = {
-  content: string;
+  content: Buffer;
   name: string;
+  newFileName: string;
+  tempLocation: string;
 };
