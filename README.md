@@ -6,10 +6,13 @@ Simple use-case for online AVIF image conversion using Nest.JS with Bull and Red
 
 - Running Redis
 - NX Console
+- Ubuntu or other Linux distro.
+- Node 20
 
 ## Notes
 
 - It's not a production-ready code.
+- No progress bar for images.
 
 ## Local URLs
 
