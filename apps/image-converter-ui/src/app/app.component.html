@@ -2,16 +2,22 @@
     <h1>The BullMQ AVIF converter</h1>
     <div>
         <div>
+            <button (click)="uploadFiles()" [disabled]="files.length === 0">Upload</button>
+        </div>
+        <div>
             <ngx-dropzone (change)="pickFiles($event)" accept="image/png, image/gif, image/jpeg">
                 <ngx-dropzone-label>Drop images</ngx-dropzone-label>
-                @for (f of files; track $index) {
-                <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" [removable]="true" [file]="f"
-                    (removed)="removeFile(f)">
-                </ngx-dropzone-image-preview>
-                }
+                <div class="preview">
+                    @for (f of files; track $index) {
+                    <div> <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" [removable]="true" [file]="f"
+                            (removed)="removeFile(f)">
+                        </ngx-dropzone-image-preview></div>
+
+                    }
+                </div>
+
             </ngx-dropzone>
         </div>
-
         <div>
             <button (click)="uploadFiles()" [disabled]="files.length === 0">Upload</button>
         </div>
@@ -30,7 +36,7 @@
     @if (converted.length > 0) {
     <div class="images">@for( img of converted; track $index) {
         <div>
-            <img [src]="baseUrl +'/' + img">
+            <img [src]="baseUrl +'/' + img" />
         </div>
         }
     </div>
