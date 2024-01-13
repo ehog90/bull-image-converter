@@ -2,13 +2,13 @@
     <h1>The BullMQ AVIF converter</h1>
     <div>
         <div>
-            <button (click)="uploadFiles()" [disabled]="files.length === 0">Upload</button>
+            <button (click)="uploadFiles()" [disabled]="emptyFiles()">Upload</button>
         </div>
         <div>
             <ngx-dropzone (change)="pickFiles($event)" accept="image/png, image/gif, image/jpeg">
                 <ngx-dropzone-label>Drop images</ngx-dropzone-label>
                 <div class="preview">
-                    @for (f of files; track $index) {
+                    @for (f of files(); track $index) {
                     <div> <ngx-dropzone-image-preview ngProjectAs="ngx-dropzone-preview" [removable]="true" [file]="f"
                             (removed)="removeFile(f)">
                         </ngx-dropzone-image-preview></div>
@@ -19,22 +19,22 @@
             </ngx-dropzone>
         </div>
         <div>
-            <button (click)="uploadFiles()" [disabled]="files.length === 0">Upload</button>
+            <button (click)="uploadFiles()" [disabled]="emptyFiles()">Upload</button>
         </div>
     </div>
     <div class="progress">
-        @if (sessionCompleted !== null && completed !== 0 && remaining !== 0) {
-        <div>Completed: {{sessionCompleted}} Remaining: {{remaining}}</div>
-        @if (remaining !== 0) {
-        <progress [value]="sessionCompleted / (sessionCompleted + remaining)"></progress>
+        @if (showProgressText()) {
+        <div>Completed: {{sessionCompleted()}} Remaining: {{remaining()}}</div>
+        @if (remaining() !== 0) {
+        <progress [value]="progressBarValue()"></progress>
         }
         }
         @else {
         No active conversion in progress.
         }
     </div>
-    @if (converted.length > 0) {
-    <div class="images">@for( img of converted; track $index) {
+    @if (converted().length > 0) {
+    <div class="images">@for( img of converted(); track $index) {
         <div>
             <img [src]="baseUrl +'/' + img" />
         </div>

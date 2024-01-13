@@ -14,7 +14,7 @@ export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
   // #region Properties (3)
 
   private logger = new Logger(ImageEventGateway.name);
-  private until = new Subject<void>();
+  private untilDestroy$ = new Subject<void>();
 
   @WebSocketServer()
   public server: Server;
@@ -43,13 +43,13 @@ export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
   }
 
   public onModuleDestroy() {
-    this.until.next();
-    this.until.complete();
+    this.untilDestroy$.next();
+    this.untilDestroy$.complete();
   }
 
   public onModuleInit() {
     this.eventBus
-      .pipe(ofType(ImageConvertedEvent), takeUntil(this.until))
+      .pipe(ofType(ImageConvertedEvent), takeUntil(this.untilDestroy$))
       .subscribe(async (event) => {
         const jobData = await this.imagesQueue.getJobCounts();
         this.server.emit('newImage', {
@@ -59,7 +59,7 @@ export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
         });
       })
       this.eventBus
-      .pipe(ofType(ImageEnqueuedEvent), takeUntil(this.until))
+      .pipe(ofType(ImageEnqueuedEvent), takeUntil(this.untilDestroy$))
       .subscribe(async () => {
         const jobData = await this.imagesQueue.getJobCounts();
         this.server.emit('stats', {

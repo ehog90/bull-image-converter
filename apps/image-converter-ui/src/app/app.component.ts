@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgxDropzoneModule, NgxDropzoneChangeEvent } from 'ngx-dropzone';
 import { FileUploadService } from './services/file-upload.service';
 import { Socket, io } from 'socket.io-client';
@@ -14,34 +14,36 @@ import { BASE_URL } from './utils';
   styleUrl: './app.component.scss',
 })
 export class AppComponent implements OnInit {
-  // #region Properties (7)
+  // #region Properties (12)
 
-  public all = 0;
+  private readonly fileUploadService = inject(FileUploadService);
+
+  public all = signal(0)
   public baseUrl = BASE_URL;
-  public completed = 0;
-  public converted: string[] = [];
-  public files: File[] = [];
-  public initialCompleted: number | null = null;
-  public remaining = 0;
-
-  // #endregion Properties (7)
-
-  // #region Constructors (1)
-
-  constructor(private readonly fileUploadService: FileUploadService) {}
-
-  // #endregion Constructors (1)
-
-  // #region Public Getters And Setters (1)
-
-  public get sessionCompleted() {
-    if (this.initialCompleted === null) {
+  public completed = signal(0);
+  public converted = signal<string[]>([])
+  public emptyFiles = computed(() => {
+    return this.files().length === 0
+  })
+  public files = signal<File[]>([])
+  public initialCompleted = signal<number | null>(null);
+  public progressBarValue = computed(() => {
+    const sessionCompleted = this.sessionCompleted() ?? 0
+    return sessionCompleted / (sessionCompleted + this.remaining())
+  })
+  public remaining = signal(0)
+  public sessionCompleted = computed(() => {
+    const initialCompleted = this.initialCompleted();
+    if (initialCompleted === null) {
       return null;
     }
-    return this.completed - this.initialCompleted;
-  }
+    return this.completed() - initialCompleted
+  })
+  public showProgressText = computed(() => {
+   return  this.sessionCompleted() !== null && this.completed() !== 0 && this.remaining() !== 0
+  })
 
-  // #endregion Public Getters And Setters (1)
+  // #endregion Properties (12)
 
   // #region Public Methods (4)
 
@@ -51,23 +53,24 @@ export class AppComponent implements OnInit {
       this.pushStats(remaining, completed);
     });
     socket.on('newImage', ({ imageUrl, remaining, completed }) => {
-      this.converted.push(imageUrl);
-      this.remaining = remaining;
+      this.converted.update(c => [...c, imageUrl])
+      this.remaining.set(remaining);
       this.pushStats(remaining, completed);
     });
   }
 
   public pickFiles(event: NgxDropzoneChangeEvent) {
-    this.files.push(...event.addedFiles);
+    this.files.update(f => [...f, ...event.addedFiles])
   }
 
   public removeFile(file: File) {
-    this.files.splice(this.files.indexOf(file), 1);
+    this.files.update(files => files.filter(f => f != file))
   }
 
   public uploadFiles() {
-    this.fileUploadService.uploadFiles(this.files);
-    this.files = [];
+    this.fileUploadService.uploadFiles(this.files());
+    this.files.set([]);
+    this.completed.set(0)
   }
 
   // #endregion Public Methods (4)
@@ -75,12 +78,12 @@ export class AppComponent implements OnInit {
   // #region Private Methods (1)
 
   private pushStats(remaining: number, completed: number) {
-    this.remaining = remaining;
-    if (this.initialCompleted === null) {
-      this.initialCompleted = completed;
+    this.remaining.set(remaining);
+    if (this.initialCompleted() === null) {
+      this.initialCompleted.set(completed)
     }
-    this.completed = completed;
-    this.all = this.sessionCompleted ?? 0 + this.remaining;
+    this.completed.set(completed);
+    this.all.set(this.sessionCompleted() ?? 0 + this.remaining());
   }
 
   // #endregion Private Methods (1)
