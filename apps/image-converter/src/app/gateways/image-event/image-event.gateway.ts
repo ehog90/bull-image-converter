@@ -7,6 +7,7 @@ import { Server, Socket } from 'socket.io';
 import { ImageConvertedEvent } from '../../events/image-converted.event';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { ImageEnqueuedEvent } from '../../events/image-enqueued.event';
 
 @WebSocketGateway({ cors: true })
 export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
@@ -56,8 +57,15 @@ export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
           remaining: jobData.active + jobData.waiting,
           completed: jobData.completed,
         });
-
-        this.logger.debug(`Clients notified: ${event.imageUrl}`);
+      })
+      this.eventBus
+      .pipe(ofType(ImageEnqueuedEvent), takeUntil(this.until))
+      .subscribe(async () => {
+        const jobData = await this.imagesQueue.getJobCounts();
+        this.server.emit('stats', {
+          remaining: jobData.active + jobData.waiting,
+          completed: jobData.completed,
+        });
       });
   }
 

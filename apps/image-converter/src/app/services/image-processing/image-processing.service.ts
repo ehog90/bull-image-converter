@@ -1,5 +1,5 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UploadedFiles } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { Express } from 'express';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -7,6 +7,9 @@ import { Multer } from 'multer';
 import { file } from 'tmp-promise';
 import { writeFile } from 'fs/promises';
 import { ImageJob } from '../../types';
+import { EventBus } from '@nestjs/cqrs';
+import { ImageEnqueuedEvent } from '../../events/image-enqueued.event';
+import { from, mergeMap } from 'rxjs';
 
 @Injectable()
 export class ImageProcessingService {
@@ -18,7 +21,7 @@ export class ImageProcessingService {
 
   // #region Constructors (1)
 
-  constructor(@InjectQueue('images') private imagesQueue: Queue<ImageJob>) {}
+  constructor(@InjectQueue('images') private readonly imagesQueue: Queue<ImageJob>, private readonly eventBus: EventBus) {}
 
   // #endregion Constructors (1)
 
@@ -37,6 +40,7 @@ export class ImageProcessingService {
         tempLocation: path,
         newFileName: `${uploadedFile.originalname}.avif`,
       });
+      this.eventBus.publish(new ImageEnqueuedEvent())
     }
   }
 
