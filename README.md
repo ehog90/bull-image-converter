@@ -6,13 +6,16 @@ Simple use-case for online AVIF image conversion using Nest.JS with BullMQ and R
 
 - Running Redis
 - NX Console
-- Ubuntu or other Linux distro. May work on macOS.
+- macOS or Linux (Tested on macOS and Ubuntu)
 - Node 20
 
 ## Notes and limitiations.
 
 - It's not a production-ready code.
-- No progress bar for images.
+- No Docker deployment options.
+- No unit / integration tests.
+- Some variables are hard-linked (not in .env)
+- Minimalist progress reporting.
 - Try with smaller images.
 
 ## Local URLs

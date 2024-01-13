@@ -3,29 +3,63 @@ import { EventBus, ofType } from '@nestjs/cqrs';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Subject, takeUntil } from 'rxjs';
 
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ImageConvertedEvent } from '../../events/image-converted.event';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @WebSocketGateway({ cors: true })
 export class ImageEventGateway implements OnModuleDestroy, OnModuleInit {
-  private until = new Subject<void>();
+  // #region Properties (3)
 
   private logger = new Logger(ImageEventGateway.name);
+  private until = new Subject<void>();
 
-  constructor(private readonly eventBus: EventBus) {}
+  @WebSocketServer()
+  public server: Server;
 
-  onModuleDestroy() {
+  // #endregion Properties (3)
+
+  // #region Constructors (1)
+
+  constructor(
+    private readonly eventBus: EventBus,
+    @InjectQueue('images') private imagesQueue: Queue,
+  ) {}
+
+  // #endregion Constructors (1)
+
+  // #region Public Methods (3)
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  public async handleConnection(_: Socket) {
+    this.logger.log('A client is connected!');
+    const jobData = await this.imagesQueue.getJobCounts();
+    this.server.emit('stats', {
+      remaining: jobData.active + jobData.waiting,
+      completed: jobData.completed,
+    });
+  }
+
+  public onModuleDestroy() {
     this.until.next();
     this.until.complete();
   }
-  onModuleInit() {
+
+  public onModuleInit() {
     this.eventBus
       .pipe(ofType(ImageConvertedEvent), takeUntil(this.until))
-      .subscribe((event) => {
-        this.server.emit('converted', event);
-        this.logger.log(`Client notified: ${event.imageUrl}`);
+      .subscribe(async (event) => {
+        const jobData = await this.imagesQueue.getJobCounts();
+        this.server.emit('newImage', {
+          imageUrl: event.imageUrl,
+          remaining: jobData.active + jobData.waiting,
+          completed: jobData.completed,
+        });
+
+        this.logger.debug(`Clients notified: ${event.imageUrl}`);
       });
   }
-  @WebSocketServer()
-  public server: Server;
+
+  // #endregion Public Methods (3)
 }
